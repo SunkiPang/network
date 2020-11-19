@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define BUF_SIZE 30
+#define BUF_SIZE 100
 void error_handling(char *message);
 
 int main(int argc, char *argv[])
@@ -14,10 +14,16 @@ int main(int argc, char *argv[])
 	FILE *fp;
 
 	char buf[BUF_SIZE];
+	char buff[BUF_SIZE];
 	int read_cnt;
 
-	struct sockaddr_in serv_adr, clnt_adr;
-	socklen_t clnt_adr_sz;
+	for (int i = 0; i < BUF_SIZE; i++)
+	{
+		buff[i] = 0;
+	}
+
+	struct sockaddr_in serv_adr, from_adr;
+	socklen_t adr_sz;
 
 	if (argc != 4)
 	{
@@ -26,47 +32,40 @@ int main(int argc, char *argv[])
 	}
 	fp = fopen(argv[3], "rb");
 	//fp = fopen("receive.dat", "wb");
-	sd = socket(PF_INET, SOCK_STREAM, 0);
+	sd = socket(PF_INET, SOCK_DGRAM, 0);
 
 	memset(&serv_adr, 0, sizeof(serv_adr));
 	serv_adr.sin_family = AF_INET;
 	serv_adr.sin_addr.s_addr = inet_addr(argv[1]);
 	serv_adr.sin_port = htons(atoi(argv[2]));
 
-	connect(sd, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-
 	//여기까진 ㅇㅋ
+	// printf("wowo");
 
 	while (1)
 	{
 		read_cnt = fread((void *)buf, 1, BUF_SIZE, fp);
 		if (read_cnt < BUF_SIZE)
 		{
-			write(sd, buf, read_cnt);
+			sendto(sd, buf, read_cnt, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
+			// write(sd, buf, read_cnt);
 			break;
 		}
-		write(sd, buf, BUF_SIZE);
+		adr_sz = sizeof(serv_adr);
+		sendto(sd, 0, BUF_SIZE, 0, (struct sockaddr *)&serv_adr, adr_sz);
+		// write(sd, buf, BUF_SIZE);
 	}
 
-	shutdown(sd, SHUT_WR);
-	read(sd, buf, BUF_SIZE);
-	printf("Message from client: %s \n", buf);
+	// shutdown(sd, SHUT_WR);
+	socklen_t from_adr_sz = sizeof(from_adr);
+	int str_len = recvfrom(sd, buff, BUF_SIZE, 0, (struct sockaddr *)&from_adr, &from_adr_sz);
+
+	printf("Message from client: %s \n", buff);
 
 	fclose(fp);
 	close(sd);
 
 	return 0;
-
-	// connect(sd, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-
-	// while ((read_cnt = read(sd, buf, BUF_SIZE)) != 0)
-	// 	fwrite((void *)buf, 1, read_cnt, fp);
-
-	// puts("Received file data");
-	// write(sd, "Thank you", 10);
-	// fclose(fp);
-	// close(sd);
-	// return 0;
 }
 
 void error_handling(char *message)

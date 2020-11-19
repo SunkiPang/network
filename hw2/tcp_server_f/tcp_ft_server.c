@@ -10,6 +10,7 @@ void error_handling(char *message);
 
 int main(int argc, char *argv[])
 {
+
 	int serv_sd, clnt_sd;
 	FILE *fp;
 	char buf[BUF_SIZE];
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 	//fp=fopen("file_server.c", "rb");
+
 	fp = fopen("receive.dat", "wb");
 	serv_sd = socket(PF_INET, SOCK_STREAM, 0); // 서버측 소켓 주소
 
@@ -58,6 +60,7 @@ int main(int argc, char *argv[])
 	write(clnt_sd, "Thank you", 10);
 	fclose(fp);
 	close(serv_sd);
+
 	return 0;
 
 	// while (1)
