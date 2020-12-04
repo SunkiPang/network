@@ -4,9 +4,24 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <time.h>
+#include <sys/stat.h>
 
 #define BUF_SIZE 100
 void error_handling(char *message);
+
+typedef struct packet
+{
+	char data[1024];
+} Packet;
+
+typedef struct frame
+{
+	int frame_kind; //ACK:0, SEQ:1 FIN:2
+	int sq_no;
+	int ack;
+	Packet packet;
+} Frame;
 
 int main(int argc, char *argv[])
 {
@@ -18,12 +33,15 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serv_adr, clnt_adr;
 	socklen_t clnt_adr_sz;
 
+	int frame_id = 0;
+	Frame frame_recv;
+	Frame frame_send;
+
 	if (argc != 2)
 	{
 		printf("Usage: %s <port>\n", argv[0]);
 		exit(1);
 	}
-	//fp=fopen("file_server.c", "rb");
 	fp = fopen("receive.dat", "wb");
 	serv_sd = socket(PF_INET, SOCK_DGRAM, 0); // 서버측 소켓 주소
 
@@ -57,11 +75,22 @@ int main(int argc, char *argv[])
 	// }
 	while (1)
 	{
-		read_cnt = recvfrom(serv_sd, buf, BUF_SIZE, 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
-		fwrite((void *)buf, 1, read_cnt, fp);
-
-		puts("Received file data");
-		sendto(serv_sd, "Thank you", 10, 0, (struct sockaddr *)&clnt_adr, clnt_adr_sz);
+		// int f_recv_size = recvfrom(serv_sd, &)
+		read_cnt = recvfrom(serv_sd, &frame_recv, sizeof(Frame), 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
+		if (read_cnt > 0 && frame_recv.frame_kind == 1 && frame_recv.sq_no == frame_id)
+		{
+			fwrite((void *)buf, 1, read_cnt, fp);
+			frame_send.sq_no = 0;
+			frame_send.frame_kind = 0;
+			frame_send.ack = frame_recv.sq_no + 1;
+			puts("Received file data");
+			sendto(serv_sd, "Thank you", 10, 0, (struct sockaddr *)&clnt_adr, clnt_adr_sz);
+		}
+		else
+		{
+			printf("Not Recived\n");
+		}
+		frame_id++;
 	}
 	fclose(fp);
 	close(serv_sd);
