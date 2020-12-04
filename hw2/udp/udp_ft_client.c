@@ -40,7 +40,6 @@ int main(int argc, char *argv[])
 	serv_adr.sin_port = htons(atoi(argv[2]));
 
 	//여기까진 ㅇㅋ
-	// printf("wowo");
 
 	while (1)
 	{
@@ -48,15 +47,12 @@ int main(int argc, char *argv[])
 		if (read_cnt < BUF_SIZE)
 		{
 			sendto(sd, buf, read_cnt, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
-			// write(sd, buf, read_cnt);
 			break;
 		}
 		adr_sz = sizeof(serv_adr);
 		sendto(sd, 0, BUF_SIZE, 0, (struct sockaddr *)&serv_adr, adr_sz);
-		// write(sd, buf, BUF_SIZE);
 	}
 
-	// shutdown(sd, SHUT_WR);
 	socklen_t from_adr_sz = sizeof(from_adr);
 	int str_len = recvfrom(sd, buff, BUF_SIZE, 0, (struct sockaddr *)&from_adr, &from_adr_sz);
 
