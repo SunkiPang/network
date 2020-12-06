@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
@@ -39,31 +40,25 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serv_adr, from_adr;
 	socklen_t adr_sz;
 
-	printf("checkcheck $d\n", bug_check++);
-
 	if (argc != 4)
 	{
 		printf("Usage: %s <IP> <port> <filename>\n", argv[0]);
 		exit(1);
 	}
-	printf("checkcheck $d\n", bug_check++);
 
 	for (int i = 0; i < BUF_SIZE; i++)
 	{
 		buff[i] = 0;
 	}
-	printf("checkcheck $d\n", bug_check++);
 
 	fp = fopen(argv[3], "rb");
 	//fp = fopen("receive.dat", "wb");
 	sd = socket(PF_INET, SOCK_DGRAM, 0);
-	printf("checkcheck $d\n", bug_check++);
 
 	memset(&serv_adr, 0, sizeof(serv_adr));
 	serv_adr.sin_family = AF_INET;
 	serv_adr.sin_addr.s_addr = inet_addr(argv[1]);
 	serv_adr.sin_port = htons(atoi(argv[2]));
-	printf("checkcheck $d\n", bug_check++);
 
 	//여기까진 ㅇㅋ
 

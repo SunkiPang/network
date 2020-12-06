@@ -77,11 +77,13 @@ int main(int argc, char *argv[])
 	{
 		// int f_recv_size = recvfrom(serv_sd, &)
 		read_cnt = recvfrom(serv_sd, &frame_recv, sizeof(Frame), 0, (struct sockaddr *)&clnt_adr, &clnt_adr_sz);
-		if (read_cnt > 0 && frame_recv.frame_kind == 1 && frame_recv.sq_no == frame_id)
+		// printf("***out**** \nread_cnt : %d\n frame_recv.frame_kind : %d\n frame_recv.sq_no: %d\n frame_id : %d\n", read_cnt, frame_recv.frame_kind, frame_recv.sq_no, frame_id);
+		if (read_cnt > 0 /*&& frame_recv.frame_kind == 1 && frame_recv.sq_no == frame_id*/)
 		{
 			fwrite((void *)buf, 1, read_cnt, fp);
 			frame_send.sq_no = 0;
 			frame_send.frame_kind = 0;
+			// printf("***in**** \nread_cnt : %d\n frame_recv.frame_kind : %d\n frame_recv.sq_no: %d\n frame_id : %d\n", read_cnt, frame_recv.frame_kind, frame_recv.sq_no, frame_id);
 			frame_send.ack = frame_recv.sq_no + 1;
 			puts("Received file data");
 			sendto(serv_sd, "Thank you", 10, 0, (struct sockaddr *)&clnt_adr, clnt_adr_sz);
