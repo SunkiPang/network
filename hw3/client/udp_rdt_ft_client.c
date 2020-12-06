@@ -71,9 +71,12 @@ int main(int argc, char *argv[])
 			frame_send.ack = 0;
 
 			read_cnt = fread((void *)buf, 1, BUF_SIZE, fp);
+			strcpy(frame_send.packet.data, buf);
+			// printf("***out**** \nread_cnt : %d\n frame_recv.frame_kind : %d\n frame_recv.sq_no: %d\n frame_id : %d\n", read_cnt, frame_recv.frame_kind, frame_recv.sq_no, frame_id);
+
 			if (read_cnt < BUF_SIZE)
 			{
-				sendto(sd, buf, read_cnt, 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
+				sendto(sd, &frame_send, sizeof(Frame), 0, (struct sockaddr *)&serv_adr, sizeof(serv_adr));
 				break;
 			}
 			adr_sz = sizeof(serv_adr);
@@ -82,14 +85,16 @@ int main(int argc, char *argv[])
 		// int addr_size = sizeof(serv_adr);
 		int f_recv_size = recvfrom(sd, &frame_recv, sizeof(frame_recv), 0, (struct sockaddr *)&serv_adr, &adr_sz);
 
+		// printf("***out**** \nread_cnt : %d\n frame_recv.frame_kind : %d\n frame_recv.sq_no: %d\n frame_id : %d\n", read_cnt, frame_recv.frame_kind, frame_recv.sq_no, frame_id);
+
 		if (f_recv_size > 0 && frame_recv.sq_no == 0 && frame_recv.ack == frame_id + 1)
 		{
-			printf("[+]Ack Received\n");
+			printf("Ack Received\n");
 			ack_recv = 1;
 		}
 		else
 		{
-			printf("[-]Ack Not Received\n");
+			printf("Ack Not Received\n");
 			ack_recv = 0;
 		}
 
